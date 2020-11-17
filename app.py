@@ -19,7 +19,9 @@ def login():
     username = request.args.get("username")
     password = request.args.get("password")
     with Database() as db:
-        db.execute(f"SELECT secret FROM users WHERE username = '{username}' AND password = '{password}'")
+        query = "SELECT secret FROM users WHERE username = ? AND password = ?"
+        params = (username, password)
+        db.execute(query, params)
         data = db.fetchone()
         if data is None:
             return "Incorrect username or password"
@@ -32,9 +34,10 @@ def list_users():
     secret = request.args.get("secret")
     with Database() as db:
         try:
-            query = f"SELECT secret FROM users WHERE secret = '{secret}' and username = 'root'"
+            query = f"SELECT secret FROM users WHERE secret = ? and username = 'root'"
+            params = (secret,)
             print(query)
-            db.execute(query)
+            db.execute(query, params)
             data = db.fetchone()
         except sqlite3.OperationalError:
             return jsonify({'error': "Database error"})
